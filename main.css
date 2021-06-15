@@ -1,3 +1,7 @@
-yt-error {
+#yt-error {
     color: red;
+}
+
+.element {
+    padding-bottom: 10px
 }
