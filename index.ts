@@ -1,26 +1,23 @@
-// https://www.youtube.com/watch?v=erxN99OQkbY
+interface WireSelectorComps {
+    thumb: HTMLImageElement,
+    link: HTMLInputElement,
+    error: HTMLElement,
+}
 
-function WireSelector(comps, callback) {
-    comps.thumb.onload = function(e) {
+function WireSelector(comps: WireSelectorComps, callback: () => void) {
+    comps.thumb.onload = function() {
         callback();
     };
 
-    comps.link.onchange = function(e) {
+    comps.link.onchange = function() {
         try {
             comps.error.innerText = '';
             comps.thumb.src = '';
-            const url = new URL(this.value);
+            const url = new URL(comps.link.value);
             const ytHostRegexp = new RegExp('^(.+\.)?youtube\.com$');
             if (ytHostRegexp.test(url.hostname)) {
                 const ytVideoId = url.searchParams.getAll('v').join('')
                 comps.thumb.src = `http://i3.ytimg.com/vi/${ytVideoId}/maxresdefault.jpg`;
-                fetch(`https://www.youtube.com/watch?v=${ytVideoId}`, { mode: 'no-cors'}).then((res) => {
-                    return res.text();
-                }).then((html) => {
-                    console.log(html);
-                    let parser = new DOMParser();
-                    let doc = parser.parseFromString(html, 'text/html');
-                });
             } else {
                 throw new Error('Only YouTube Links are supported');
             }
@@ -30,17 +27,28 @@ function WireSelector(comps, callback) {
     };
 }
 
+function getElementByIdOrDie(elementId: string): HTMLElement {
+    const element = document.getElementById(elementId);
+    if (element === null) {
+        throw new Error(`Could not find element with id '${elementId}'`);
+    }
+    return element;
+}
+
 window.onload = () => {
-    const ytLink = document.getElementById("yt-link");
-    const ytError = document.getElementById("yt-error");
-    const ytThumb = document.getElementById("yt-thumb");
-    const ytCanvas = document.getElementById("yt-canvas");
+    const ytLink = getElementByIdOrDie("yt-link") as HTMLInputElement;
+    const ytError = getElementByIdOrDie("yt-error") as HTMLElement;
+    const ytThumb = getElementByIdOrDie("yt-thumb") as HTMLImageElement;
+    const ytCanvas = getElementByIdOrDie("yt-canvas") as HTMLCanvasElement;
     const ctx = ytCanvas.getContext('2d');
+    if (ctx === null) {
+        throw new Error(`Could not initialize 2d context`);
+    }
 
     WireSelector({
-        "link": ytLink,
-        "thumb": ytThumb,
-        "error": ytError,
+        link: ytLink,
+        thumb: ytThumb,
+        error: ytError,
     }, () => {
         const w = 800.0;
         const r = ytThumb.height / ytThumb.width;
