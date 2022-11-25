@@ -6,24 +6,31 @@ function getElementByIdOrDie(elementId: string): HTMLElement {
     return element;
 }
 
-function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElement, ytTitle: HTMLInputElement, width: number, fontSize: number, pad: number): void {
-    const aspect = ytThumb.height / ytThumb.width;
-    const height = aspect * width;
+interface Config {
+    title: string;
+    width: number;
+    fontSize: number;
+    pad: number;
+}
 
-    ctx.canvas.width  = width;
+function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElement, config: Config): void {
+    const aspect = ytThumb.height / ytThumb.width;
+    const height = aspect * config.width;
+
+    ctx.canvas.width  = config.width;
     ctx.canvas.height = height;
 
-    ctx.drawImage(ytThumb, 0, 0, width, height);
+    ctx.drawImage(ytThumb, 0, 0, config.width, height);
     let gradient = ctx.createLinearGradient(
-        width * 0.5, height,
-        width * 0.5, 0);
+        config.width * 0.5, height,
+        config.width * 0.5, 0);
     gradient.addColorStop(0.0, 'black');
     gradient.addColorStop(1.0, '#00000000');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-    ctx.font = `${fontSize}px serif`;
+    ctx.fillRect(0, 0, config.width, height);
+    ctx.font = `${config.fontSize}px serif`;
     ctx.fillStyle = 'white';
-    ctx.fillText(ytTitle.value, pad, height - pad);
+    ctx.fillText(config.title, config.pad, height - config.pad);
 }
 
 window.onload = () => {
@@ -46,21 +53,35 @@ window.onload = () => {
     ytWidthDisplay.value = ytWidth.value;
     ytFontDisplay.value = `${ytFont.value}px`;
     ytPadDisplay.value = ytPad.value;
+
+    const config = {
+        title: ytTitle.value,
+        width: Number(ytWidth.value),
+        fontSize: Number(ytFont.value),
+        pad: Number(ytPad.value),
+    };
+
     ytWidth.oninput = () => {
         ytWidthDisplay.value = ytWidth.value;
-        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+        config.width = Number(ytWidth.value);
+        renderThumbnail(ctx, ytThumb, config);
     }
     ytFont.oninput = () => {
         ytFontDisplay.value = `${ytFont.value}px`;
-        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+        config.fontSize = Number(ytFont.value);
+        renderThumbnail(ctx, ytThumb, config);
     }
     ytPad.oninput = () => {
         ytPadDisplay.value = ytPad.value;
-        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+        config.pad = Number(ytPad.value);
+        renderThumbnail(ctx, ytThumb, config);
     }
-    ytTitle.onchange = () => renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
-    ytThumb.onload = () => renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
-    ytLink.onchange = () => {
+    ytTitle.oninput = () => {
+        config.title = ytTitle.value;
+        renderThumbnail(ctx, ytThumb, config);
+    }
+    ytThumb.onload = () => renderThumbnail(ctx, ytThumb, config);
+    ytLink.oninput = () => {
         try {
             ytError.innerText = '';
             ytThumb.src = '';
@@ -76,9 +97,15 @@ window.onload = () => {
             ytError.innerText = e.message;
         }
     };
+
+    ytLink.dispatchEvent(new Event("input"));
 };
 
-// TODO: a reasonable presentable CSS style
-// TODO: long range sliders (for finer control of the parameters)
-// TODO: store the parameters in the URL
+// TODO: a reasonably presentable CSS style
+// TODO: long range sliders (for finer control over the parameters)
 // TODO: save/download the thumbnail button
+// TODO: remember last used parameters in the local storage
+// TODO: button to reset to default paremeters
+// TODO: set the parameters in the URL
+//   If some of the parameters are not set, get them from the remembered parameters from storage.
+//   If some parameters are not from storage, get the default ones.
