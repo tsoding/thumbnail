@@ -6,27 +6,24 @@ function getElementByIdOrDie(elementId: string): HTMLElement {
     return element;
 }
 
-function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElement, ytTitle: HTMLInputElement): void {
-    const w = 800.0;
-    const r = ytThumb.height / ytThumb.width;
-    const h = r * w;
-    const pad = 50;
+function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElement, ytTitle: HTMLInputElement, width: number, fontSize: number, pad: number): void {
+    const aspect = ytThumb.height / ytThumb.width;
+    const height = aspect * width;
 
-    ctx.canvas.width  = w;
-    ctx.canvas.height = h;
+    ctx.canvas.width  = width;
+    ctx.canvas.height = height;
 
-    ctx.drawImage(ytThumb, 0, 0, w, h);
+    ctx.drawImage(ytThumb, 0, 0, width, height);
     let gradient = ctx.createLinearGradient(
-        w * 0.5, h,
-        w * 0.5, 0);
+        width * 0.5, height,
+        width * 0.5, 0);
     gradient.addColorStop(0.0, 'black');
     gradient.addColorStop(1.0, '#00000000');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, w, h);
-    // TODO: let the user control the font size
-    ctx.font = '44px serif';
+    ctx.fillRect(0, 0, width, height);
+    ctx.font = `${fontSize}px serif`;
     ctx.fillStyle = 'white';
-    ctx.fillText(ytTitle.value, pad, h - pad);
+    ctx.fillText(ytTitle.value, pad, height - pad);
 }
 
 window.onload = () => {
@@ -35,13 +32,34 @@ window.onload = () => {
     const ytThumb = getElementByIdOrDie("yt-thumb") as HTMLImageElement;
     const ytCanvas = getElementByIdOrDie("yt-canvas") as HTMLCanvasElement;
     const ytTitle = getElementByIdOrDie("yt-title") as HTMLInputElement;
+    const ytWidth = getElementByIdOrDie("yt-width") as HTMLInputElement;
+    const ytWidthDisplay = getElementByIdOrDie("yt-width-display") as HTMLOutputElement;
+    const ytFont = getElementByIdOrDie("yt-font") as HTMLInputElement;
+    const ytFontDisplay = getElementByIdOrDie("yt-font-display") as HTMLOutputElement;
+    const ytPad = getElementByIdOrDie("yt-pad") as HTMLInputElement;
+    const ytPadDisplay = getElementByIdOrDie("yt-pad-display") as HTMLOutputElement;
     const ctx = ytCanvas.getContext('2d');
     if (ctx === null) {
         throw new Error(`Could not initialize 2d context`);
     }
 
-    ytTitle.onchange = () => renderThumbnail(ctx, ytThumb, ytTitle);
-    ytThumb.onload = () => renderThumbnail(ctx, ytThumb, ytTitle);
+    ytWidthDisplay.value = ytWidth.value;
+    ytFontDisplay.value = `${ytFont.value}px`;
+    ytPadDisplay.value = ytPad.value;
+    ytWidth.oninput = () => {
+        ytWidthDisplay.value = ytWidth.value;
+        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+    }
+    ytFont.oninput = () => {
+        ytFontDisplay.value = `${ytFont.value}px`;
+        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+    }
+    ytPad.oninput = () => {
+        ytPadDisplay.value = ytPad.value;
+        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+    }
+    ytTitle.onchange = () => renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+    ytThumb.onload = () => renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
     ytLink.onchange = () => {
         try {
             ytError.innerText = '';

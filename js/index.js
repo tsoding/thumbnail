@@ -6,22 +6,20 @@ function getElementByIdOrDie(elementId) {
     }
     return element;
 }
-function renderThumbnail(ctx, ytThumb, ytTitle) {
-    var w = 800.0;
-    var r = ytThumb.height / ytThumb.width;
-    var h = r * w;
-    var pad = 50;
-    ctx.canvas.width = w;
-    ctx.canvas.height = h;
-    ctx.drawImage(ytThumb, 0, 0, w, h);
-    var gradient = ctx.createLinearGradient(w * 0.5, h, w * 0.5, 0);
+function renderThumbnail(ctx, ytThumb, ytTitle, width, fontSize, pad) {
+    var aspect = ytThumb.height / ytThumb.width;
+    var height = aspect * width;
+    ctx.canvas.width = width;
+    ctx.canvas.height = height;
+    ctx.drawImage(ytThumb, 0, 0, width, height);
+    var gradient = ctx.createLinearGradient(width * 0.5, height, width * 0.5, 0);
     gradient.addColorStop(0.0, 'black');
     gradient.addColorStop(1.0, '#00000000');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, w, h);
-    ctx.font = '44px serif';
+    ctx.fillRect(0, 0, width, height);
+    ctx.font = fontSize + "px serif";
     ctx.fillStyle = 'white';
-    ctx.fillText(ytTitle.value, pad, h - pad);
+    ctx.fillText(ytTitle.value, pad, height - pad);
 }
 window.onload = function () {
     var ytLink = getElementByIdOrDie("yt-link");
@@ -29,12 +27,33 @@ window.onload = function () {
     var ytThumb = getElementByIdOrDie("yt-thumb");
     var ytCanvas = getElementByIdOrDie("yt-canvas");
     var ytTitle = getElementByIdOrDie("yt-title");
+    var ytWidth = getElementByIdOrDie("yt-width");
+    var ytWidthDisplay = getElementByIdOrDie("yt-width-display");
+    var ytFont = getElementByIdOrDie("yt-font");
+    var ytFontDisplay = getElementByIdOrDie("yt-font-display");
+    var ytPad = getElementByIdOrDie("yt-pad");
+    var ytPadDisplay = getElementByIdOrDie("yt-pad-display");
     var ctx = ytCanvas.getContext('2d');
     if (ctx === null) {
         throw new Error("Could not initialize 2d context");
     }
-    ytTitle.onchange = function () { return renderThumbnail(ctx, ytThumb, ytTitle); };
-    ytThumb.onload = function () { return renderThumbnail(ctx, ytThumb, ytTitle); };
+    ytWidthDisplay.value = ytWidth.value;
+    ytFontDisplay.value = ytFont.value + "px";
+    ytPadDisplay.value = ytPad.value;
+    ytWidth.oninput = function () {
+        ytWidthDisplay.value = ytWidth.value;
+        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+    };
+    ytFont.oninput = function () {
+        ytFontDisplay.value = ytFont.value + "px";
+        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+    };
+    ytPad.oninput = function () {
+        ytPadDisplay.value = ytPad.value;
+        renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value));
+    };
+    ytTitle.onchange = function () { return renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value)); };
+    ytThumb.onload = function () { return renderThumbnail(ctx, ytThumb, ytTitle, Number(ytWidth.value), Number(ytFont.value), Number(ytPad.value)); };
     ytLink.onchange = function () {
         try {
             ytError.innerText = '';
