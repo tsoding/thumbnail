@@ -77,3 +77,8 @@ window.onload = () => {
         }
     };
 };
+
+// TODO: a reasonable presentable CSS style
+// TODO: long range sliders (for finer control of the parameters)
+// TODO: store the parameters in the URL
+// TODO: save/download the thumbnail button
