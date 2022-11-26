@@ -17,7 +17,7 @@ function renderThumbnail(ctx, ytThumb, config) {
     gradient.addColorStop(1.0, '#00000000');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, config.width, height);
-    ctx.font = config.fontSize + "px serif";
+    ctx.font = config.fontSize + "px LibreBaskerville";
     ctx.fillStyle = 'white';
     ctx.fillText(config.title, config.pad, height - config.pad);
 }

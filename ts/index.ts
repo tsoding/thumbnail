@@ -28,7 +28,7 @@ function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElemen
     gradient.addColorStop(1.0, '#00000000');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, config.width, height);
-    ctx.font = `${config.fontSize}px serif`;
+    ctx.font = `${config.fontSize}px LibreBaskerville`;
     ctx.fillStyle = 'white';
     ctx.fillText(config.title, config.pad, height - config.pad);
 }
@@ -101,8 +101,6 @@ window.onload = () => {
     ytLink.dispatchEvent(new Event("input"));
 };
 
-// TODO: a reasonably presentable CSS style
-// TODO: long range sliders (for finer control over the parameters)
 // TODO: save/download the thumbnail button
 // TODO: remember last used parameters in the local storage
 // TODO: button to reset to default paremeters

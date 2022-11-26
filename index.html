@@ -1,17 +1,46 @@
 <html>
     <head>
         <title>YouTube Thumbnail</title>
-        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/reset.css" />
+        <link rel="stylesheet" href="css/main.css" />
     </head>
     <body>
+        <h1>Thumbnail Generator</h1>
+        <p>Generating YouTube video thumbnails for GitHub READMEs.</p>
         <div id="yt-error"></div>
-        <div class="element"><img id="yt-thumb" style="display: none"></img></div>
-        <div class="element"><input id="yt-title" type="text" placeholder="Title" value="Writing My Own Malloc in C"></div>
-        <div class="element"><input id="yt-link" type="text" placeholder="YouTube Link" value="https://www.youtube.com/watch?v=sZ8GJ1TiMdk" /></div>
-        <div class="element">Width: <input id="yt-width" type="range" step="10" min="100" max="1920" value="400"><output id="yt-width-display"></output></div>
-        <div class="element">Font size: <input id="yt-font" type="range" step="1" min="8" max="128" value="24"><output id="yt-font-display"></output></div>
-        <div class="element">Padding: <input id="yt-pad" type="range" step="1" min="0" max="1920" value="35"><output id="yt-pad-display"></output></div>
-        <div class="element"><canvas id="yt-canvas" width="480" height="360"></canvas></div>
+        <div class="element">
+            <img id="yt-thumb" style="display: none"></img>
+        </div>
+        <div class="element">
+            <input id="yt-title"
+                   type="text"
+                   placeholder="Title"
+                   value="Writing My Own Malloc in C" />
+        </div>
+        <div class="element">
+            <input id="yt-link"
+                   type="text"
+                   placeholder="YouTube Link"
+                   value="https://www.youtube.com/watch?v=sZ8GJ1TiMdk" />
+        </div>
+        <div class="element">
+            <label for="yt-width">Width:</label>
+            <input id="yt-width" type="range" step="10" min="100" max="1920" value="400" />
+            <output id="yt-width-display"></output>
+        </div>
+        <div class="element">
+            <label for="yt-font">Font size:</label>
+            <input id="yt-font" type="range" step="1" min="8" max="128" value="20" />
+            <output id="yt-font-display"></output>
+        </div>
+        <div class="element">
+            <label for="yt-pad">Padding:</label>
+            <input id="yt-pad" type="range" step="1" min="0" max="960" value="35" />
+            <output id="yt-pad-display"></output>
+        </div>
+        <div class="element">
+            <canvas id="yt-canvas" width="480" height="360"></canvas>
+        </div>
         <script src='js/index.js'></script>
     </body>
 </html>

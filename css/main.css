@@ -1,7 +1,59 @@
+@font-face {
+    font-family: 'LibreBaskerville';
+    src: url('../fonts/LibreBaskerville-Regular.ttf') format('truetype');
+}
+
+body {
+    width: 720px;
+    margin: auto;
+    font-family: LibreBaskerville;
+    font-size: 16px;
+}
+
+p {
+    text-align: center;
+}
+
+input {
+    font-family: LibreBaskerville;
+}
+
+h1 {
+    font-size: 48px;
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
 #yt-error {
     color: red;
 }
 
+p {
+    padding-top: 20px;
+}
+
 .element {
-    padding-bottom: 10px
+    padding-top: 20px;
+    text-align: center;
+}
+
+.element label {
+    display: inline-block;
+    width: 15%;
+    text-align: right;
+}
+
+.element input[type=text] {
+    width: 80%;
+}
+
+.element input[type=range] {
+    width: 55%;
+}
+
+.element output {
+    display: inline-block;
+    width: 10%;
+    text-align: left;
 }
