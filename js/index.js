@@ -6,20 +6,23 @@ function getElementByIdOrDie(elementId) {
     }
     return element;
 }
-function renderThumbnail(ctx, ytThumb, config) {
+function renderThumbnail(ctx, ytThumb, state) {
     var aspect = ytThumb.height / ytThumb.width;
-    var height = aspect * config.width;
-    ctx.canvas.width = config.width;
+    var height = aspect * state.width;
+    ctx.canvas.width = state.width;
     ctx.canvas.height = height;
-    ctx.drawImage(ytThumb, 0, 0, config.width, height);
-    var gradient = ctx.createLinearGradient(config.width * 0.5, height, config.width * 0.5, 0);
+    ctx.drawImage(ytThumb, 0, 0, state.width, height);
+    var gradient = ctx.createLinearGradient(state.width * 0.5, height, state.width * 0.5, 0);
     gradient.addColorStop(0.0, 'black');
     gradient.addColorStop(1.0, '#00000000');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, config.width, height);
-    ctx.font = config.fontSize + "px LibreBaskerville";
+    ctx.fillRect(0, 0, state.width, height);
+    ctx.font = state.fontSize + "px LibreBaskerville";
     ctx.fillStyle = 'white';
-    ctx.fillText(config.title, config.pad, height - config.pad);
+    ctx.fillText(state.title, state.pad, height - state.pad);
+}
+function updateUrl(state) {
+    window.history.replaceState(null, "", "/?" + new URLSearchParams(state).toString());
 }
 window.onload = function () {
     var ytLink = getElementByIdOrDie("yt-link");
@@ -34,39 +37,64 @@ window.onload = function () {
     var ytPad = getElementByIdOrDie("yt-pad");
     var ytPadDisplay = getElementByIdOrDie("yt-pad-display");
     var ctx = ytCanvas.getContext('2d');
-    if (ctx === null) {
+    if (ctx === null)
         throw new Error("Could not initialize 2d context");
-    }
+    var params = new URLSearchParams(window.location.search);
+    var title = params.get("title");
+    if (title)
+        ytTitle.value = title;
+    var width = params.get("width");
+    if (width)
+        ytWidth.value = width;
+    var fontSize = params.get("fontSize");
+    if (fontSize)
+        ytFont.value = fontSize;
+    var pad = params.get("pad");
+    if (pad)
+        ytPad.value = pad;
+    var link = params.get("link");
+    if (link)
+        ytLink.value = link;
     ytWidthDisplay.value = ytWidth.value;
     ytFontDisplay.value = ytFont.value + "px";
     ytPadDisplay.value = ytPad.value;
-    var config = {
+    var state = {
         title: ytTitle.value,
         width: Number(ytWidth.value),
         fontSize: Number(ytFont.value),
         pad: Number(ytPad.value),
+        link: ytLink.value,
     };
+    var json = JSON.stringify(state);
+    console.log(json);
+    console.log(btoa(json));
+    ytWidth.onchange = function () { return updateUrl(state); };
     ytWidth.oninput = function () {
         ytWidthDisplay.value = ytWidth.value;
-        config.width = Number(ytWidth.value);
-        renderThumbnail(ctx, ytThumb, config);
+        state.width = Number(ytWidth.value);
+        renderThumbnail(ctx, ytThumb, state);
     };
+    ytFont.onchange = function () { return updateUrl(state); };
     ytFont.oninput = function () {
         ytFontDisplay.value = ytFont.value + "px";
-        config.fontSize = Number(ytFont.value);
-        renderThumbnail(ctx, ytThumb, config);
+        state.fontSize = Number(ytFont.value);
+        renderThumbnail(ctx, ytThumb, state);
     };
+    ytPad.onchange = function () { return updateUrl(state); };
     ytPad.oninput = function () {
         ytPadDisplay.value = ytPad.value;
-        config.pad = Number(ytPad.value);
-        renderThumbnail(ctx, ytThumb, config);
+        state.pad = Number(ytPad.value);
+        renderThumbnail(ctx, ytThumb, state);
     };
+    ytTitle.onchange = function () { return updateUrl(state); };
     ytTitle.oninput = function () {
-        config.title = ytTitle.value;
-        renderThumbnail(ctx, ytThumb, config);
+        state.title = ytTitle.value;
+        renderThumbnail(ctx, ytThumb, state);
     };
-    ytThumb.onload = function () { return renderThumbnail(ctx, ytThumb, config); };
+    ytThumb.onload = function () { return renderThumbnail(ctx, ytThumb, state); };
+    ytLink.onchange = function () { return updateUrl(state); };
     ytLink.oninput = function () {
+        state.link = ytLink.value;
         try {
             ytError.innerText = '';
             ytThumb.src = '';

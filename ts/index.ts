@@ -6,82 +6,104 @@ function getElementByIdOrDie(elementId: string): HTMLElement {
     return element;
 }
 
-interface Config {
+interface State {
     title: string;
     width: number;
     fontSize: number;
     pad: number;
+    link: string;
 }
 
-function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElement, config: Config): void {
+function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElement, state: State): void {
     const aspect = ytThumb.height / ytThumb.width;
-    const height = aspect * config.width;
+    const height = aspect * state.width;
 
-    ctx.canvas.width  = config.width;
+    ctx.canvas.width  = state.width;
     ctx.canvas.height = height;
 
-    ctx.drawImage(ytThumb, 0, 0, config.width, height);
+    ctx.drawImage(ytThumb, 0, 0, state.width, height);
     let gradient = ctx.createLinearGradient(
-        config.width * 0.5, height,
-        config.width * 0.5, 0);
+        state.width * 0.5, height,
+        state.width * 0.5, 0);
     gradient.addColorStop(0.0, 'black');
     gradient.addColorStop(1.0, '#00000000');
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, config.width, height);
-    ctx.font = `${config.fontSize}px LibreBaskerville`;
+    ctx.fillRect(0, 0, state.width, height);
+    ctx.font = `${state.fontSize}px LibreBaskerville`;
     ctx.fillStyle = 'white';
-    ctx.fillText(config.title, config.pad, height - config.pad);
+    ctx.fillText(state.title, state.pad, height - state.pad);
+}
+
+function updateUrl(state: State) {
+    window.history.replaceState(null, "", "/?"+new URLSearchParams(state as any).toString())
 }
 
 window.onload = () => {
-    const ytLink = getElementByIdOrDie("yt-link") as HTMLInputElement;
-    const ytError = getElementByIdOrDie("yt-error") as HTMLElement;
-    const ytThumb = getElementByIdOrDie("yt-thumb") as HTMLImageElement;
-    const ytCanvas = getElementByIdOrDie("yt-canvas") as HTMLCanvasElement;
-    const ytTitle = getElementByIdOrDie("yt-title") as HTMLInputElement;
-    const ytWidth = getElementByIdOrDie("yt-width") as HTMLInputElement;
+    const ytLink         = getElementByIdOrDie("yt-link")          as HTMLInputElement;
+    const ytError        = getElementByIdOrDie("yt-error")         as HTMLElement;
+    const ytThumb        = getElementByIdOrDie("yt-thumb")         as HTMLImageElement;
+    const ytCanvas       = getElementByIdOrDie("yt-canvas")        as HTMLCanvasElement;
+    const ytTitle        = getElementByIdOrDie("yt-title")         as HTMLInputElement;
+    const ytWidth        = getElementByIdOrDie("yt-width")         as HTMLInputElement;
     const ytWidthDisplay = getElementByIdOrDie("yt-width-display") as HTMLOutputElement;
-    const ytFont = getElementByIdOrDie("yt-font") as HTMLInputElement;
-    const ytFontDisplay = getElementByIdOrDie("yt-font-display") as HTMLOutputElement;
-    const ytPad = getElementByIdOrDie("yt-pad") as HTMLInputElement;
-    const ytPadDisplay = getElementByIdOrDie("yt-pad-display") as HTMLOutputElement;
+    const ytFont         = getElementByIdOrDie("yt-font")          as HTMLInputElement;
+    const ytFontDisplay  = getElementByIdOrDie("yt-font-display")  as HTMLOutputElement;
+    const ytPad          = getElementByIdOrDie("yt-pad")           as HTMLInputElement;
+    const ytPadDisplay   = getElementByIdOrDie("yt-pad-display")   as HTMLOutputElement;
+
     const ctx = ytCanvas.getContext('2d');
-    if (ctx === null) {
-        throw new Error(`Could not initialize 2d context`);
-    }
+    if (ctx === null) throw new Error(`Could not initialize 2d context`);
+
+    const params = new URLSearchParams(window.location.search);
+    const title    = params.get("title");    if (title)    ytTitle.value = title;
+    const width    = params.get("width");    if (width)    ytWidth.value = width;
+    const fontSize = params.get("fontSize"); if (fontSize) ytFont.value  = fontSize;
+    const pad      = params.get("pad");      if (pad)      ytPad.value   = pad;
+    const link     = params.get("link");     if (link)     ytLink.value  = link;
 
     ytWidthDisplay.value = ytWidth.value;
-    ytFontDisplay.value = `${ytFont.value}px`;
-    ytPadDisplay.value = ytPad.value;
+    ytFontDisplay.value  = `${ytFont.value}px`;
+    ytPadDisplay.value   = ytPad.value;
 
-    const config = {
+    const state = {
         title: ytTitle.value,
         width: Number(ytWidth.value),
         fontSize: Number(ytFont.value),
         pad: Number(ytPad.value),
+        link: ytLink.value,
     };
 
+    const json = JSON.stringify(state);
+    console.log(json)
+    console.log(btoa(json));
+
+    ytWidth.onchange = () => updateUrl(state);
     ytWidth.oninput = () => {
         ytWidthDisplay.value = ytWidth.value;
-        config.width = Number(ytWidth.value);
-        renderThumbnail(ctx, ytThumb, config);
+        state.width = Number(ytWidth.value);
+        renderThumbnail(ctx, ytThumb, state);
     }
+    ytFont.onchange = () => updateUrl(state);
     ytFont.oninput = () => {
         ytFontDisplay.value = `${ytFont.value}px`;
-        config.fontSize = Number(ytFont.value);
-        renderThumbnail(ctx, ytThumb, config);
+        state.fontSize = Number(ytFont.value);
+        renderThumbnail(ctx, ytThumb, state);
     }
+    ytPad.onchange = () => updateUrl(state);
     ytPad.oninput = () => {
         ytPadDisplay.value = ytPad.value;
-        config.pad = Number(ytPad.value);
-        renderThumbnail(ctx, ytThumb, config);
+        state.pad = Number(ytPad.value);
+        renderThumbnail(ctx, ytThumb, state);
     }
+    ytTitle.onchange = () => updateUrl(state);
     ytTitle.oninput = () => {
-        config.title = ytTitle.value;
-        renderThumbnail(ctx, ytThumb, config);
+        state.title = ytTitle.value;
+        renderThumbnail(ctx, ytThumb, state);
     }
-    ytThumb.onload = () => renderThumbnail(ctx, ytThumb, config);
+    ytThumb.onload = () => renderThumbnail(ctx, ytThumb, state);
+    ytLink.onchange = () => updateUrl(state);
     ytLink.oninput = () => {
+        state.link = ytLink.value;
         try {
             ytError.innerText = '';
             ytThumb.src = '';
@@ -94,7 +116,7 @@ window.onload = () => {
                 throw new Error('Only YouTube Links are supported');
             }
         } catch(e) {
-            ytError.innerText = e.message;
+            ytError.innerText = (e as Error).message;
         }
     };
 
@@ -103,7 +125,6 @@ window.onload = () => {
 
 // TODO: save/download the thumbnail button
 // TODO: remember last used parameters in the local storage
+//   If some of the parameters are not set in the URL, get them from the storage.
+//   If some parameters are not in the storage, get the default ones.
 // TODO: button to reset to default paremeters
-// TODO: set the parameters in the URL
-//   If some of the parameters are not set, get them from the remembered parameters from storage.
-//   If some parameters are not from storage, get the default ones.
