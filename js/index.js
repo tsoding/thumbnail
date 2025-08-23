@@ -21,8 +21,15 @@ function renderThumbnail(ctx, ytThumb, state) {
     ctx.fillStyle = 'white';
     ctx.fillText(state.title, state.pad, height - state.pad);
 }
-function updateUrl(state) {
-    window.history.replaceState(null, "", "/?" + new URLSearchParams(state).toString());
+function updateUrl(state, defaultState) {
+    var diff = {};
+    var key;
+    for (key in state) {
+        if (defaultState[key] !== state[key]) {
+            diff[key] = state[key].toString();
+        }
+    }
+    window.history.replaceState(null, "", "/?" + new URLSearchParams(diff).toString());
 }
 window.onload = function () {
     var ytLink = getElementByIdOrDie("yt-link");
@@ -39,6 +46,13 @@ window.onload = function () {
     var ctx = ytCanvas.getContext('2d');
     if (ctx === null)
         throw new Error("Could not initialize 2d context");
+    var defaultState = {
+        title: ytTitle.value,
+        width: Number(ytWidth.value),
+        fontSize: Number(ytFont.value),
+        pad: Number(ytPad.value),
+        link: ytLink.value,
+    };
     var params = new URLSearchParams(window.location.search);
     var title = params.get("title");
     if (title)
@@ -68,31 +82,31 @@ window.onload = function () {
     var json = JSON.stringify(state);
     console.log(json);
     console.log(btoa(json));
-    ytWidth.onchange = function () { return updateUrl(state); };
+    ytWidth.onchange = function () { return updateUrl(state, defaultState); };
     ytWidth.oninput = function () {
         ytWidthDisplay.value = ytWidth.value;
         state.width = Number(ytWidth.value);
         renderThumbnail(ctx, ytThumb, state);
     };
-    ytFont.onchange = function () { return updateUrl(state); };
+    ytFont.onchange = function () { return updateUrl(state, defaultState); };
     ytFont.oninput = function () {
         ytFontDisplay.value = ytFont.value + "px";
         state.fontSize = Number(ytFont.value);
         renderThumbnail(ctx, ytThumb, state);
     };
-    ytPad.onchange = function () { return updateUrl(state); };
+    ytPad.onchange = function () { return updateUrl(state, defaultState); };
     ytPad.oninput = function () {
         ytPadDisplay.value = ytPad.value;
         state.pad = Number(ytPad.value);
         renderThumbnail(ctx, ytThumb, state);
     };
-    ytTitle.onchange = function () { return updateUrl(state); };
+    ytTitle.onchange = function () { return updateUrl(state, defaultState); };
     ytTitle.oninput = function () {
         state.title = ytTitle.value;
         renderThumbnail(ctx, ytThumb, state);
     };
     ytThumb.onload = function () { return renderThumbnail(ctx, ytThumb, state); };
-    ytLink.onchange = function () { return updateUrl(state); };
+    ytLink.onchange = function () { return updateUrl(state, defaultState); };
     ytLink.oninput = function () {
         state.link = ytLink.value;
         try {

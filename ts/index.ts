@@ -12,6 +12,7 @@ interface State {
     fontSize: number;
     pad: number;
     link: string;
+    [index: string]: number | string;
 }
 
 function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElement, state: State): void {
@@ -34,8 +35,15 @@ function renderThumbnail(ctx: CanvasRenderingContext2D, ytThumb: HTMLImageElemen
     ctx.fillText(state.title, state.pad, height - state.pad);
 }
 
-function updateUrl(state: State) {
-    window.history.replaceState(null, "", "/?"+new URLSearchParams(state as any).toString())
+function updateUrl(state: State, defaultState: State) {
+    let diff: Record<string, string> = {};
+    let key: string;
+    for (key in state) {
+        if (defaultState[key] !== state[key]) {
+            diff[key] = state[key].toString();
+        }
+    }
+    window.history.replaceState(null, "", "/?"+new URLSearchParams(diff).toString())
 }
 
 window.onload = () => {
@@ -53,6 +61,14 @@ window.onload = () => {
 
     const ctx = ytCanvas.getContext('2d');
     if (ctx === null) throw new Error(`Could not initialize 2d context`);
+
+    const defaultState = {
+        title: ytTitle.value,
+        width: Number(ytWidth.value),
+        fontSize: Number(ytFont.value),
+        pad: Number(ytPad.value),
+        link: ytLink.value,
+    };
 
     const params = new URLSearchParams(window.location.search);
     const title    = params.get("title");    if (title)    ytTitle.value = title;
@@ -77,31 +93,31 @@ window.onload = () => {
     console.log(json)
     console.log(btoa(json));
 
-    ytWidth.onchange = () => updateUrl(state);
+    ytWidth.onchange = () => updateUrl(state, defaultState);
     ytWidth.oninput = () => {
         ytWidthDisplay.value = ytWidth.value;
         state.width = Number(ytWidth.value);
         renderThumbnail(ctx, ytThumb, state);
     }
-    ytFont.onchange = () => updateUrl(state);
+    ytFont.onchange = () => updateUrl(state, defaultState);
     ytFont.oninput = () => {
         ytFontDisplay.value = `${ytFont.value}px`;
         state.fontSize = Number(ytFont.value);
         renderThumbnail(ctx, ytThumb, state);
     }
-    ytPad.onchange = () => updateUrl(state);
+    ytPad.onchange = () => updateUrl(state, defaultState);
     ytPad.oninput = () => {
         ytPadDisplay.value = ytPad.value;
         state.pad = Number(ytPad.value);
         renderThumbnail(ctx, ytThumb, state);
     }
-    ytTitle.onchange = () => updateUrl(state);
+    ytTitle.onchange = () => updateUrl(state, defaultState);
     ytTitle.oninput = () => {
         state.title = ytTitle.value;
         renderThumbnail(ctx, ytThumb, state);
     }
     ytThumb.onload = () => renderThumbnail(ctx, ytThumb, state);
-    ytLink.onchange = () => updateUrl(state);
+    ytLink.onchange = () => updateUrl(state, defaultState);
     ytLink.oninput = () => {
         state.link = ytLink.value;
         try {
