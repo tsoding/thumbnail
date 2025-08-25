@@ -29,7 +29,7 @@ function updateUrl(state, defaultState) {
             diff[key] = state[key].toString();
         }
     }
-    window.history.replaceState(null, "", "/?" + new URLSearchParams(diff).toString());
+    window.history.replaceState(null, "", "?" + new URLSearchParams(diff).toString());
 }
 window.onload = function () {
     var ytLink = getElementByIdOrDie("yt-link");
