@@ -43,7 +43,7 @@ function updateUrl(state: State, defaultState: State) {
             diff[key] = state[key].toString();
         }
     }
-    window.history.replaceState(null, "", "/?"+new URLSearchParams(diff).toString())
+    window.history.replaceState(null, "", "?" + new URLSearchParams(diff).toString());
 }
 
 window.onload = () => {
