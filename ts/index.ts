@@ -144,3 +144,4 @@ window.onload = () => {
 //   If some of the parameters are not set in the URL, get them from the storage.
 //   If some parameters are not in the storage, get the default ones.
 // TODO: button to reset to default paremeters
+// TODO: put the YouTube play button at the center of the thumbnail
