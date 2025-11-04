@@ -8,7 +8,7 @@
         <h1>Thumbnail Generator</h1>
         <p>Generating YouTube video thumbnails for GitHub READMEs.</p>
         <div class="element">
-            <img id="yt-thumb" style="display: none"></img>
+            <img crossOrigin="anonymous" id="yt-thumb" style="display: none"></img>
         </div>
         <div class="element">
             <label for="yt-title">Title:</label>
@@ -44,6 +44,10 @@
             <input id="yt-pad" type="range" step="1" min="0" max="960" value="35" />
             <output id="yt-pad-display"></output>
         </div>
+				<div class="element">
+					<button id="download">Download</button>
+					<button id="reset">Reset</button>
+				</div>
         <div class="element">
             <canvas id="yt-canvas" width="480" height="360"></canvas>
         </div>

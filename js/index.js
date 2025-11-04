@@ -2,7 +2,7 @@
 function getElementByIdOrDie(elementId) {
     var element = document.getElementById(elementId);
     if (element === null) {
-        throw new Error("Could not find element with id '" + elementId + "'");
+        throw new Error("Could not find element with id '".concat(elementId, "'"));
     }
     return element;
 }
@@ -17,7 +17,7 @@ function renderThumbnail(ctx, ytThumb, state) {
     gradient.addColorStop(1.0, '#00000000');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, state.width, height);
-    ctx.font = state.fontSize + "px LibreBaskerville";
+    ctx.font = "".concat(state.fontSize, "px LibreBaskerville");
     ctx.fillStyle = 'white';
     ctx.fillText(state.title, state.pad, height - state.pad);
 }
@@ -31,6 +31,26 @@ function updateUrl(state, defaultState) {
     }
     window.history.replaceState(null, "", "?" + new URLSearchParams(diff).toString());
 }
+function slugify(str) {
+    return str
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+}
+function downloadThumbnail(title, canvas) {
+    canvas.toBlob(function (blob) {
+        if (!blob)
+            throw new Error("Could not convert the canvas to Blob");
+        var link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = slugify(title);
+        link.click();
+        URL.revokeObjectURL(link.href);
+    });
+}
 window.onload = function () {
     var ytLink = getElementByIdOrDie("yt-link");
     var ytError = getElementByIdOrDie("yt-error");
@@ -43,6 +63,8 @@ window.onload = function () {
     var ytFontDisplay = getElementByIdOrDie("yt-font-display");
     var ytPad = getElementByIdOrDie("yt-pad");
     var ytPadDisplay = getElementByIdOrDie("yt-pad-display");
+    var downloadBtn = getElementByIdOrDie("download");
+    var resetBtn = getElementByIdOrDie("reset");
     var ctx = ytCanvas.getContext('2d');
     if (ctx === null)
         throw new Error("Could not initialize 2d context");
@@ -70,18 +92,26 @@ window.onload = function () {
     if (link)
         ytLink.value = link;
     ytWidthDisplay.value = ytWidth.value;
-    ytFontDisplay.value = ytFont.value + "px";
+    ytFontDisplay.value = "".concat(ytFont.value, "px");
     ytPadDisplay.value = ytPad.value;
-    var state = {
-        title: ytTitle.value,
-        width: Number(ytWidth.value),
-        fontSize: Number(ytFont.value),
-        pad: Number(ytPad.value),
-        link: ytLink.value,
-    };
+    var state = Object.assign({}, defaultState);
     var json = JSON.stringify(state);
     console.log(json);
     console.log(btoa(json));
+    downloadBtn.addEventListener("click", function () { return downloadThumbnail(ytTitle.value, ytCanvas); });
+    resetBtn.addEventListener("click", function () {
+        ytTitle.value = defaultState.title;
+        ytWidth.value = defaultState.width.toString();
+        ytFont.value = defaultState.fontSize.toString();
+        ytPad.value = defaultState.pad.toString();
+        ytLink.value = defaultState.link;
+        ytWidthDisplay.value = defaultState.width.toString();
+        ytFontDisplay.value = "".concat(defaultState.fontSize.toString(), "px");
+        ytPadDisplay.value = ytPad.value;
+        state = Object.assign({}, defaultState);
+        updateUrl(state, defaultState);
+        renderThumbnail(ctx, ytThumb, state);
+    });
     ytWidth.onchange = function () { return updateUrl(state, defaultState); };
     ytWidth.oninput = function () {
         ytWidthDisplay.value = ytWidth.value;
@@ -90,7 +120,7 @@ window.onload = function () {
     };
     ytFont.onchange = function () { return updateUrl(state, defaultState); };
     ytFont.oninput = function () {
-        ytFontDisplay.value = ytFont.value + "px";
+        ytFontDisplay.value = "".concat(ytFont.value, "px");
         state.fontSize = Number(ytFont.value);
         renderThumbnail(ctx, ytThumb, state);
     };
@@ -116,7 +146,7 @@ window.onload = function () {
             var ytHostRegexp = new RegExp('^(.+\.)?youtube\.com$');
             if (ytHostRegexp.test(url.hostname)) {
                 var ytVideoId = url.searchParams.getAll('v').join('');
-                ytThumb.src = "http://i3.ytimg.com/vi/" + ytVideoId + "/maxresdefault.jpg";
+                ytThumb.src = "http://i3.ytimg.com/vi/".concat(ytVideoId, "/maxresdefault.jpg");
             }
             else {
                 throw new Error('Only YouTube Links are supported');
