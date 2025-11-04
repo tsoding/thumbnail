@@ -10,6 +10,37 @@ body {
     font-size: 16px;
 }
 
+button {
+  padding: 8px 16px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #fff;
+  background-color: #555;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #333;
+}
+
+button#download {
+  background-color: #2b7a2b;
+}
+
+button#download:hover {
+  background-color: #216121;
+}
+
+button#reset {
+   background-color: #b33a3a;
+}
+
+button#reset:hover {
+  background-color: #902d2d;
+}
+
 p {
     text-align: center;
 }
